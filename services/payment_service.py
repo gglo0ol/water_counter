@@ -17,7 +17,7 @@ class PaymentService:
         """Получение действующего тарифа для типа услуги"""
         return self.db.query(Tariff)\
             .filter(Tariff.service_type == service_type)\
-            .filter((Tariff.end_date.is_(None)) | (Tariff.end_date > datetime.utcnow()))\
+            .filter((Tariff.end_date.is_(None)) | (Tariff.end_date > datetime.now()))\
             .order_by(desc(Tariff.start_date))\
             .first()
     
@@ -140,7 +140,7 @@ class PaymentService:
         """Инициализация тарифов по умолчанию"""
         default_tariffs = [
             ("cold_water", 68.02),      # 68.02 руб за м³ холодной воды
-            ("hot_water", 166.81),      # 166.81 руб за м³ горячей воды (подогрев)
+            ("hot_water", 234.82),      # 234.82 руб за м³ горячей воды (подогрев)
             ("wastewater", 62.00),      # 62.00 руб за м³ утилизации
         ]
         

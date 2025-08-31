@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
-
-
+# -*- coding: utf-8 -*-3
 
 from models.database import engine
 from models.entities import Base
