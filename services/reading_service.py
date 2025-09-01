@@ -50,34 +50,29 @@ class ReadingService:
             .all()
     
     def get_monthly_consumption(self, year: int, month: int) -> Dict[str, int]:
-        """Расчет потребления за месяц по типам воды (только за последние 2 месяца)"""
+        """Расчет потребления как разница двух последних показаний по каждому счетчику"""
         # Получаем все счетчики
         counters = self.db.query(Counter).all()
         
         consumption = {"hot": 0, "cold": 0}
         
         for counter in counters:
-            # Получаем последние показания за предыдущий и текущий месяц
-            current_month_start = datetime(year, month, 1)
-            if month == 1:
-                prev_month_start = datetime(year - 1, 12, 1)
-            else:
-                prev_month_start = datetime(year, month - 1, 1)
-            
-            # Получаем показания за последние 2 месяца
-            current_reading = self.get_latest_reading_by_date(counter.id, current_month_start)
-            prev_reading = self.get_latest_reading_by_date(counter.id, prev_month_start)
-            
-            if current_reading and prev_reading:
-                diff = current_reading.value - prev_reading.value
-                if diff >= 0:  # Проверяем, что показания не уменьшились
+            # Берем два последних показания по дате
+            last_two = self.db.query(Reading)\
+                .filter(Reading.counter_id == counter.id)\
+                .order_by(desc(Reading.reading_date))\
+                .limit(2)\
+                .all()
+
+            if len(last_two) == 2:
+                last_reading, previous_reading = last_two[0], last_two[1]
+                diff = last_reading.value - previous_reading.value
+                if diff >= 0:
                     consumption[counter.water_type] += diff
                 else:
                     print(f"⚠️ Внимание: Показания счетчика {counter.number} уменьшились. Проверьте данные.")
-            elif not current_reading:
-                print(f"⚠️ Внимание: Нет показаний счетчика {counter.number} за текущий месяц")
-            elif not prev_reading:
-                print(f"⚠️ Внимание: Нет показаний счетчика {counter.number} за предыдущий месяц")
+            else:
+                print(f"⚠️ Внимание: Для счетчика {counter.number} недостаточно данных (нужно минимум два показания)")
         
         return consumption
     
