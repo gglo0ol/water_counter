@@ -6,6 +6,13 @@ from models.entities import Payment, Tariff
 from models.schemas import PaymentCreate, Payment as PaymentSchema, PaymentCalculation
 from .reading_service import ReadingService
 
+DEFAULT_TARIFFS = [
+            ("cold_water", 68.02),      # 68.02 руб за м³ холодной воды
+            ("hot_water", 166.8),      # 166.8 руб за м³ горячей воды (подогрев)
+            ("wastewater", 62.00),      # 62.00 руб за м³ утилизации
+        ]
+        
+
 class PaymentService:
     """Сервис для расчета платежей"""
     
@@ -138,14 +145,9 @@ class PaymentService:
     
     def initialize_default_tariffs(self) -> List[Tariff]:
         """Инициализация тарифов по умолчанию"""
-        default_tariffs = [
-            ("cold_water", 68.02),      # 68.02 руб за м³ холодной воды
-            ("hot_water", 234.82),      # 234.82 руб за м³ горячей воды (подогрев)
-            ("wastewater", 62.00),      # 62.00 руб за м³ утилизации
-        ]
         
         created_tariffs = []
-        for service_type, price in default_tariffs:
+        for service_type, price in DEFAULT_TARIFFS:
             # Проверяем, есть ли уже действующий тариф
             existing_tariff = self.get_current_tariff(service_type)
             if not existing_tariff:
