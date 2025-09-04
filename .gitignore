@@ -1,0 +1,7 @@
+water_counter.db
+*.db
+__pycache__/
+*.py[cod]
+venv/
+.DS_Store
+.idea/
